@@ -75,3 +75,9 @@ pybind11_new_project test_package test_project test_module . -g
    3. For the =find_package= command to work with =pybind11= installed from =PyPI= in a =virtualenv=, the user has to set the pybind11_DIR variable in their =CMakeLists.txt=. I curently do this by calling a python command and discovering the location of the =pybind11_cmake= package where the =pybind11Config.cmake= file is. The script generates a =CMakeLists.txt= file that already contains this line.
 
    If you're a =cmake= / =setup.py= wizard and want to help kindly open a PR with a solution for any of these issues.
+
+** Common pybind11 questions and their solutions
+
+*** I can't use =target_link_libraries=
+    
+    You might need to add the =PRIVATE= keyword (e.g. =target_link_libraries(open_karto PRIVATE Boost::thread)= )
