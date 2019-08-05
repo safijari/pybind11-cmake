@@ -8,21 +8,21 @@ project(PROJECT_NAME)
 # Note: The lines below allows a pip install pybind11 to be found by cmake.
 #       Do not remove.
 execute_process(COMMAND python -c
-                "import pybind11_tools; print(pybind11_tools.__path__[0])"
+                "import pybind11_cmake; print(pybind11_cmake.__path__[0])"
                 OUTPUT_VARIABLE pybind11_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
 find_package(pybind11 REQUIRED)
 pybind11_add_module(MODULE_NAME SOURCES)"""
 
 setup_file = """from setuptools import setup
 try:
-    import pybind11_tools
+    import pybind11_cmake
 except ImportError:
-    print("pybind11-tools must be installed."
-          "Try \\n \\t pip install pybind11_tools")
+    print("pybind11-cmake must be installed."
+          "Try \\n \\t pip install pybind11_cmake")
     import sys
     sys.exit()
 
-from pybind11_tools import CMakeExtension, CMakeBuild
+from pybind11_cmake import CMakeExtension, CMakeBuild
 
 setup(
     name='PACKAGE_NAME',
@@ -47,7 +47,7 @@ namespace py = pybind11;
 
 PYBIND11_MODULE(MODULE_NAME, m) {
     m.doc() = R"pbdoc(
-        Pybind11_tools example
+        pybind11_cmake example
         -----------------------
 
         .. currentmodule:: MODULE_NAME
@@ -106,6 +106,8 @@ def generate_project(
             to_write = to_write.replace('SOURCES', 'main.cpp')
         ff.write(to_write)
 
+        print("Generated CMakeLists.txt")
+
     if not cmake_file_only:
         with open(setup_path, 'w') as ff:
             to_write = setup_file.replace('PACKAGE_NAME', package_name).replace(
@@ -113,10 +115,14 @@ def generate_project(
                     author_name).replace('AUTH_EMAIL', author_email).replace(
                         'MODULE_NAME', module_name)
             ff.write(to_write)
+        print("Generated setup.py")
 
     if generate_example_src:
         with open('main.cpp', 'w') as ff:
             ff.write(cpp_file.replace('MODULE_NAME', module_name))
+        print("Generated main.cpp")
+
+    print("Your pybind11 project is ready. Enjoy :)")
 
 if __name__ == '__main__':
     argh.dispatch_command(generate_project)

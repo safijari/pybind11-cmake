@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 from glob import glob
 
-pn = 'pybind11_tools/'
+pn = 'pybind11_cmake/'
 
 files = glob(pn + '*.py') + glob(pn + '*.cmake') + glob(pn + '*.sh') + glob(pn + 'clang/*')
 
@@ -19,5 +19,5 @@ setup(
     scripts=['pybind11_new_project'],
     include_package_data=True,
     install_requires=['pybind11>=2,<3', 'argh'],
-    package_data={'pybind11_tools': files},
+    package_data={'pybind11_cmake': files},
 )

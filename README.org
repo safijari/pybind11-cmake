@@ -1,0 +1,77 @@
+* pybind11-cmake: Straightforward boilerplate generation for pybind11
+  
+** Introduction
+   
+   *pybind11* is great and I use it everywehre. In most cases I need to work with a cmake file so I start the project off using the [[https://github.com/pybind/cmake_example][cmake example]]. This usually involves copying the CMakeExtension/Builder class to my setup.py file and adding pybind11 to my project as a git submodule. I could do without cmake in simpler projects as shown in the [[https://github.com/pybind/python_example][python_example]] but I find it difficult to use for more complicated projects.
+  
+   The purpose of this project is to provide an easy to use interface to generate all the boilerplate for the cmake_example and provide the CMakeExtension/Builder class. It also finds the pybind11 headers without needing to make a git submodule. I will be using this exclusively from now on for all my C++ wrapping needs and hope it is useful to others as well.
+  
+** Installation   
+   Just run (preferably in a virtualenv)
+   #+begin_src
+pip install pybind11_cmake
+   #+end_src
+   
+   You can also clone this repo and run =pip install .=.
+
+** Usage
+   
+   The package exposes a single script: =pybind11_new_project=
+   
+   #+begin_src
+usage: pybind11_new_project [-h] [-a AUTHOR_NAME] [-e AUTHOR_EMAIL] [-c] [-g]
+                            package-name cmake-project-name module-name
+                            output-directory
+
+positional arguments:
+  package-name          -
+  cmake-project-name    -
+  module-name           -
+  output-directory      -
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -a AUTHOR_NAME, --author_name AUTHOR_NAME
+                        Author name for setup.py reasons. (default: '')
+  -e AUTHOR_EMAIL, --author_email AUTHOR_EMAIL
+                        Author email for setup.py reasons. (default: '')
+  -c, --cmake_file_only
+                        Flag for generating only a CMakeLists.txt file.
+                        (default: False)
+  -g, --generate_example_src
+                        Generate an example c++ file. (default: False)
+   #+end_src
+
+   A basic example would be to go into the root of your project folder and run:
+   
+   #+begin_src
+pybind11_new_project test_package test_project test_module . -g
+   #+end_src
+   
+   This will create a =CMakeLists.txt= file with the project set at =test_project= 
+   and a =pybind11= module defined as =test_module= and a corresponding =setup.py= file
+   set up to use that =CMakeLists.txt= file to build your module. Because the =-g= flag 
+   is used it will also create a =main.cpp= file which contains a basic example of how
+   to expose a function using =pybind11=. At this point you can just =python setup.py build=,
+   =python setup.py install= or =pip install .= your python package. For the above command
+   after installation you can run 
+   
+   #+begin_src python
+     from test_module import *
+     print(add(5, 5))
+     print(subtract(20, 5))
+   #+end_src
+   
+   Which should print 
+   #+begin_src
+   5
+   15
+   #+end_src
+   
+** Contributing
+   There are three major hacks in this repo that I do not like and could use help with:
+   1. I straight up copied all the cmake config information from the pybind11 repo (this is the =tools= directory)
+   2. I run a =python= command inside the =pybind11Config.cmake= file to find the headers as installed by the =pybind11= python package and set the relevant =cmake= variables
+   3. For the =find_package= command to work with =pybind11= installed from =PyPI= in a virtualenv, the user has to set the pybind11_DIR variable in their =CMakeLists.txt=. I curently do this by calling a python command and discovering the location of the =pybind11_cmake= package where the =pybind11Config.cmake= file is. The script generates a =CMakeLists.txt= file that already contains this line.
+
+   If you're a =cmake=/=setup.py= wizard and want to help kindly open a PR with a solution for any of these issues.
