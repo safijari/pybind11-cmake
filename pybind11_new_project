@@ -1,0 +1,122 @@
+#!/usr/bin/env python
+import argh
+from argh import arg
+import os
+
+cmake_file = """cmake_minimum_required(VERSION 2.8.12)
+project(PROJECT_NAME)
+# Note: The lines below allows a pip install pybind11 to be found by cmake.
+#       Do not remove.
+execute_process(COMMAND python -c
+                "import pybind11_tools; print(pybind11_tools.__path__[0])"
+                OUTPUT_VARIABLE pybind11_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+find_package(pybind11 REQUIRED)
+pybind11_add_module(MODULE_NAME SOURCES)"""
+
+setup_file = """from setuptools import setup
+try:
+    import pybind11_tools
+except ImportError:
+    print("pybind11-tools must be installed."
+          "Try \\n \\t pip install pybind11_tools")
+    import sys
+    sys.exit()
+
+from pybind11_tools import CMakeExtension, CMakeBuild
+
+setup(
+    name='PACKAGE_NAME',
+    version='0.0.1',
+    author='AUTH_NAME',
+    author_email='AUTH_EMAIL',
+    description='',
+    long_description='',
+    setup_requires=['pybind11_cmake'],
+    ext_modules=[CMakeExtension('MODULE_NAME')],
+    cmdclass=dict(build_ext=CMakeBuild),
+    zip_safe=False,
+)"""
+
+cpp_file="""#include <pybind11/pybind11.h>
+
+int add(int i, int j) {
+    return i + j;
+}
+
+namespace py = pybind11;
+
+PYBIND11_MODULE(MODULE_NAME, m) {
+    m.doc() = R"pbdoc(
+        Pybind11_tools example
+        -----------------------
+
+        .. currentmodule:: MODULE_NAME
+
+        .. autosummary::
+           :toctree: _generate
+
+           add
+           subtract
+    )pbdoc";
+
+    // Adding a regular function through reference.
+    m.def("add", &add, R"pbdoc(
+        Add two numbers
+
+        Some other explanation about the add function.
+    )pbdoc");
+
+    // Adding a function via lambda.
+    m.def("subtract", [](int i, int j) { return i - j; }, R"pbdoc(
+        Subtract two numbers
+
+        Some other explanation about the subtract function.
+    )pbdoc");
+
+#ifdef VERSION_INFO
+    m.attr("__version__") = VERSION_INFO;
+#else
+    m.attr("__version__") = "dev";
+#endif
+}"""
+
+@arg('-g', '--generate_example_src', help='Generate an example c++ file.')
+@arg('-a', '--author_name', help='Author name for setup.py reasons.')
+@arg('-e', '--author_email', help='Author email for setup.py reasons.')
+@arg('-c', '--cmake_file_only', help='Flag for generating only a CMakeLists.txt file.')
+def generate_project(
+        package_name,
+        cmake_project_name,
+        module_name,
+        output_directory,
+        author_name='',
+        author_email='',
+        cmake_file_only=False,
+        generate_example_src=False,
+):
+
+    dir = os.path.abspath(output_directory)
+    cmake_path = os.path.join(output_directory, 'CMakeLists.txt')
+    setup_path = os.path.join(output_directory, 'setup.py')
+
+    with open(cmake_path, 'w') as ff:
+        to_write = cmake_file.replace('PROJECT_NAME', cmake_project_name).replace(
+                'MODULE_NAME', module_name)
+        if generate_example_src:
+            to_write = to_write.replace('SOURCES', 'main.cpp')
+        ff.write(to_write)
+
+    if not cmake_file_only:
+        with open(setup_path, 'w') as ff:
+            to_write = setup_file.replace('PACKAGE_NAME', package_name).replace(
+                    'AUTH_NAME',
+                    author_name).replace('AUTH_EMAIL', author_email).replace(
+                        'MODULE_NAME', module_name)
+            ff.write(to_write)
+
+    if generate_example_src:
+        with open('main.cpp', 'w') as ff:
+            ff.write(cpp_file.replace('MODULE_NAME', module_name))
+
+if __name__ == '__main__':
+    argh.dispatch_command(generate_project)

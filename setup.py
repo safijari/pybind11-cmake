@@ -16,6 +16,8 @@ setup(
     long_description='',
     zip_safe=False,
     packages=find_packages(),
+    scripts=['pybind11_new_project'],
     include_package_data=True,
+    install_requires=['pybind11>=2,<3', 'argh'],
     package_data={'pybind11_tools': files},
 )
