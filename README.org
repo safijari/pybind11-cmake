@@ -1,4 +1,4 @@
-* pybind11-cmake: Straightforward boilerplate generation for pybind11
+* pybind11-cmake: Straightforward boilerplate generation for pybind11 + cmake
   
 ** Introduction
    
