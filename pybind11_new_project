@@ -14,17 +14,9 @@ find_package(pybind11 REQUIRED)
 pybind11_add_module(MODULE_NAME SOURCES)"""
 
 setup_file = """from setuptools import setup
-try:
-    import pybind11_cmake
-except ImportError:
-    print("pybind11-cmake must be installed."
-          "Try \\n \\t pip install pybind11_cmake")
-    import sys
-    sys.exit()
+import sys
 
-from pybind11_cmake import CMakeExtension, CMakeBuild
-
-setup(
+setup_kw = dict(
     name='PACKAGE_NAME',
     version='0.0.1',
     author='AUTH_NAME',
@@ -32,10 +24,19 @@ setup(
     description='',
     long_description='',
     setup_requires=['pybind11_cmake'],
-    ext_modules=[CMakeExtension('MODULE_NAME')],
-    cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
-)"""
+    ext_modules=[],
+    cmdclass={}
+)
+if len(sys.argv) > 1 and '--help' not in sys.argv[1:] and sys.argv[1] not in (
+        '--help-commands', 'egg_info', 'clean', '--version'):
+    from pybind11_cmake import CMakeExtension, CMakeBuild
+    setup_kw['ext_modules'] = [CMakeExtension('MODULE_NAME')]
+    setup_kw['cmdclass'] = dict(build_ext=CMakeBuild)
+
+if __name__ == '__main__':
+    setup(**setup_kw)
+"""
 
 cpp_file="""#include <pybind11/pybind11.h>
 
