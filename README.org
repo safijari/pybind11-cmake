@@ -81,3 +81,13 @@ pybind11_new_project test_package test_project test_module . -g
 *** I can't use =target_link_libraries=
     
     You might need to add the =PRIVATE= keyword (e.g. =target_link_libraries(open_karto PRIVATE Boost::thread)= )
+
+*** Passing shared pointers between python and C++
+
+    Normally a pybind11 wrapped C++ object is passed as a `unique_ptr`. You can instead expose it as a `shared_ptr` by doing something like:
+    ```
+      py::class_<ScanMatcherConfig, std::shared_ptr<ScanMatcherConfig>>(m, "ScanMatcherConfig")
+        .def(py::init<>())
+        .def_readwrite("coarse_angle_resolution", &ScanMatcherConfig::m_pCoarseAngleResolution);
+    ```
+    Note the two template arguments for `py::class_`.
