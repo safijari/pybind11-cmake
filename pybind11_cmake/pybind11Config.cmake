@@ -62,7 +62,8 @@
 
 set(PN pybind11)
 
-execute_process(COMMAND python -c "import pybind11; print(pybind11.get_include())" OUTPUT_VARIABLE pybind11_INCLUDE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+execute_process(COMMAND ${Python3_EXECUTABLE} -c "import pybind11; print(pybind11.get_include())" OUTPUT_VARIABLE pybind11_INCLUDE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 set(${PN}_LIBRARY "")
 set(${PN}_DEFINITIONS USING_${PN})
@@ -70,6 +71,6 @@ set(${PN}_DEFINITIONS USING_${PN})
 # make detectable the FindPythonLibsNew.cmake module
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
-include_directories(pybind11_INCLUDE_DIR)
+include_directories(${pybind11_INCLUDE_DIR})
 
 include(pybind11Tools)
