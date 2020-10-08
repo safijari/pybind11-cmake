@@ -9,7 +9,7 @@ files = [f[len(pn):] for f in files]
 
 setup(
     name='pybind11_cmake',
-    version='1.0.0',
+    version='1.0.1',
     author='Jariullah Safi',
     author_email='safijari@isu.edu',
     description='Straightforward boilerplate generation for pybind11 + cmake',
